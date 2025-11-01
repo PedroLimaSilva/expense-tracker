@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCurrency } from '../../contexts/CurrencyContext'
 import { useCategories } from '../../contexts/CategoryContext'
-import { useTheme } from '../../contexts/ThemeContext'
 import { expenseService } from '../../services/expenseService'
 import { incomeService } from '../../services/incomeService'
 import { syncService } from '../../services/syncService'
@@ -12,17 +12,16 @@ import { ExpenseList } from '../../components/Expense/list'
 import { IncomeList } from '../../components/Income/list'
 import { ExpenseForm } from '../../components/Expense/form'
 import { IncomeForm } from '../../components/Income/form'
-import { CurrencySelector } from '../../components/CurrencySelector'
 import { CategoryManager } from '../../components/CategoryManager'
 import './index.scss'
 
 type ViewType = 'expenses' | 'income' | 'overview' | 'categories'
 
 export function Dashboard() {
-  const { currentUser, logout } = useAuth()
+  const { currentUser } = useAuth()
   const { formatCurrency } = useCurrency()
   const { refreshCategories } = useCategories()
-  const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [income, setIncome] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
@@ -230,34 +229,31 @@ export function Dashboard() {
   return (
     <div className="dashboard">
       <header className="dashboard-header">
-        <h1>Expense Tracker</h1>
         <div className="header-actions">
           <button
-            onClick={toggleTheme}
-            className="btn btn-small btn-secondary theme-toggle"
-            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            onClick={() => navigate('/settings')}
+            className="btn btn-icon btn-settings"
+            title="Settings"
           >
-            {theme === 'light' ? '🌙' : '☀️'}
+            <span className="material-icons">settings</span>
           </button>
-          <div className="status-indicators">
-            {online ? (
-              <span className="status-badge online" title="Online">Online</span>
-            ) : (
-              <span className="status-badge offline" title="Offline">Offline</span>
-            )}
-            <button
-              onClick={syncData}
-              disabled={syncing || !online}
-              className="btn btn-small btn-secondary"
-              title="Sync with cloud"
-            >
-              {syncing ? 'Syncing...' : 'Sync'}
-            </button>
-          </div>
-          <button onClick={logout} className="btn btn-secondary">
-            Logout
+        </div>
+        <div className="status-indicators">
+          {online ? (
+            <span className="status-badge online" title="Online">Online</span>
+          ) : (
+            <span className="status-badge offline" title="Offline">Offline</span>
+          )}
+          <button
+            onClick={syncData}
+            disabled={syncing || !online}
+            className="btn btn-small btn-secondary btn-icon"
+            title="Sync with cloud"
+          >
+            <span className={`material-icons ${syncing ? 'sync-animation' : ''}`}>
+              sync
+            </span>
           </button>
-          {/* <CurrencySelector /> */}
         </div>
       </header>
 
@@ -319,7 +315,8 @@ export function Dashboard() {
                     }}
                     className="btn btn-primary"
                   >
-                    + Add Income
+                    <span className="material-icons">add</span>
+                    Add Income
                   </button>
                   <button
                     onClick={() => {
@@ -330,7 +327,8 @@ export function Dashboard() {
                     }}
                     className="btn btn-primary"
                   >
-                    + Add Expense
+                    <span className="material-icons">add</span>
+                    Add Expense
                   </button>
                 </div>
 
@@ -362,7 +360,8 @@ export function Dashboard() {
                     }}
                     className="btn btn-primary"
                   >
-                    + Add Income
+                    <span className="material-icons">add</span>
+                    Add Income
                   </button>
                 </div>
                 <IncomeList
@@ -384,7 +383,8 @@ export function Dashboard() {
                     }}
                     className="btn btn-primary"
                   >
-                    + Add Expense
+                    <span className="material-icons">add</span>
+                    Add Expense
                   </button>
                 </div>
                 <ExpenseList

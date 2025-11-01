@@ -1,0 +1,81 @@
+.settings {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.settings-header {
+  background: var(--surface);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+
+  h1 {
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    margin: 0;
+  }
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  
+  .material-icons {
+    font-size: 1.5rem;
+  }
+}
+
+.settings-main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.settings-section {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+
+  h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-lg) 0;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+  }
+}
+
+.settings-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.theme-toggle {
+  align-self: flex-start;
+  font-size: 1rem;
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+  border: none;
+
+  &:hover {
+    background-color: var(--danger-hover, color-mix(in srgb, var(--danger) 85%, black));
+  }
+}

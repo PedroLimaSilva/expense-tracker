@@ -27,6 +27,34 @@
   flex-wrap: wrap;
 }
 
+.btn-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  
+  .material-icons {
+    font-size: 1.5rem;
+    
+    &.sync-animation {
+      animation: spin 1s linear infinite;
+      transform-origin: center;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn-settings {
+  margin-left: auto;
+}
+
 .status-indicators {
   display: flex;
   align-items: center;
@@ -150,9 +178,4 @@
   text-align: center;
   padding: var(--spacing-2xl);
   color: var(--text-tertiary);
-}
-
-.theme-toggle {
-  font-size: 1.25rem;
-  line-height: 1;
 }
