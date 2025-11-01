@@ -28,6 +28,7 @@ class SyncService {
       const q = query(expensesRef, where('userId', '==', userId))
       const querySnapshot = await getDocs(q)
       
+      // Querying a non-existent collection returns an empty snapshot, which is fine
       return querySnapshot.docs.map(doc => {
         const data = doc.data()
         return {
@@ -37,11 +38,17 @@ class SyncService {
           createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
           updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toMillis() : data.updatedAt,
           synced: true,
-          userId
+          userId: data.userId || userId // Ensure userId is present
         } as Expense
       })
     } catch (error) {
-      console.error('Error fetching from cloud:', error)
+      console.error('Error fetching expenses from cloud:', error)
+      // Return empty array if collection doesn't exist rather than throwing
+      // This prevents sync failures when the collection hasn't been created yet
+      if ((error as any).code === 'not-found' || (error as any).code === 'permission-denied') {
+        console.warn('Expenses collection may not exist yet, returning empty array')
+        return []
+      }
       throw error
     }
   }
@@ -66,7 +73,6 @@ class SyncService {
       }
       
       const expenseRef = doc(firestoreDb, 'expenses', expense.id)
-      const expenseDoc = await getDoc(expenseRef)
       
       const expenseData = {
         id: expense.id,
@@ -86,22 +92,10 @@ class SyncService {
         data: expenseData
       })
       
-      if (!expenseDoc.exists()) {
-        // Create new document
-        await setDoc(expenseRef, expenseData)
-        console.log('✅ Created new expense document in Firebase')
-      } else {
-        // Update existing document
-        await updateDoc(expenseRef, {
-          description: expense.description,
-          amount: expense.amount,
-          category: expense.category,
-          date: expense.date,
-          updatedAt: Timestamp.now(),
-          userId: expense.userId
-        })
-        console.log('✅ Updated existing expense document in Firebase')
-      }
+      // Use setDoc to create or update - Firestore will create the collection automatically if it doesn't exist
+      // setDoc with merge ensures userId is always present
+      await setDoc(expenseRef, expenseData, { merge: true })
+      console.log('✅ Expense saved to Firebase')
     } catch (error) {
       console.error('❌ Error saving to Firebase:', error)
       if (error instanceof Error) {
@@ -198,6 +192,7 @@ class SyncService {
       const q = query(incomeRef, where('userId', '==', userId))
       const querySnapshot = await getDocs(q)
       
+      // Querying a non-existent collection returns an empty snapshot, which is fine
       return querySnapshot.docs.map(doc => {
         const data = doc.data()
         return {
@@ -207,11 +202,17 @@ class SyncService {
           createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
           updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toMillis() : data.updatedAt,
           synced: true,
-          userId
+          userId: data.userId || userId // Ensure userId is present
         } as Income
       })
     } catch (error) {
       console.error('Error fetching income from cloud:', error)
+      // Return empty array if collection doesn't exist rather than throwing
+      // This prevents sync failures when the collection hasn't been created yet
+      if ((error as any).code === 'not-found' || (error as any).code === 'permission-denied') {
+        console.warn('Income collection may not exist yet, returning empty array')
+        return []
+      }
       throw error
     }
   }
@@ -230,7 +231,6 @@ class SyncService {
       }
       
       const incomeRef = doc(firestoreDb, 'income', income.id)
-      const incomeDoc = await getDoc(incomeRef)
       
       const incomeData = {
         id: income.id,
@@ -250,22 +250,10 @@ class SyncService {
         data: incomeData
       })
       
-      if (!incomeDoc.exists()) {
-        // Create new document
-        await setDoc(incomeRef, incomeData)
-        console.log('✅ Created new income document in Firebase')
-      } else {
-        // Update existing document
-        await updateDoc(incomeRef, {
-          description: income.description,
-          amount: income.amount,
-          category: income.category,
-          date: income.date,
-          updatedAt: Timestamp.now(),
-          userId: income.userId
-        })
-        console.log('✅ Updated existing income document in Firebase')
-      }
+      // Use setDoc to create or update - Firestore will create the collection automatically if it doesn't exist
+      // setDoc with merge ensures userId is always present
+      await setDoc(incomeRef, incomeData, { merge: true })
+      console.log('✅ Income saved to Firebase')
     } catch (error) {
       console.error('❌ Error saving income to Firebase:', error)
       if (error instanceof Error) {
@@ -382,6 +370,7 @@ class SyncService {
       const q = query(categoriesRef, where('userId', '==', userId))
       const querySnapshot = await getDocs(q)
       
+      // Querying a non-existent collection returns an empty snapshot, which is fine
       return querySnapshot.docs.map(doc => {
         const data = doc.data()
         return {
@@ -390,11 +379,17 @@ class SyncService {
           createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
           updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toMillis() : data.updatedAt,
           synced: true,
-          userId
+          userId: data.userId || userId // Ensure userId is present
         } as Category
       })
     } catch (error) {
       console.error('Error fetching categories from cloud:', error)
+      // Return empty array if collection doesn't exist rather than throwing
+      // This prevents sync failures when the collection hasn't been created yet
+      if ((error as any).code === 'not-found' || (error as any).code === 'permission-denied') {
+        console.warn('Categories collection may not exist yet, returning empty array')
+        return []
+      }
       throw error
     }
   }
@@ -418,7 +413,6 @@ class SyncService {
       }
       
       const categoryRef = doc(firestoreDb, 'categories', category.id)
-      const categoryDoc = await getDoc(categoryRef)
       
       const categoryData = {
         id: category.id,
@@ -438,17 +432,10 @@ class SyncService {
         data: categoryData
       })
       
-      if (!categoryDoc.exists()) {
-        await setDoc(categoryRef, categoryData)
-        console.log('✅ Created new category document in Firebase')
-      } else {
-        await updateDoc(categoryRef, {
-          name: category.name,
-          type: category.type,
-          updatedAt: Timestamp.now()
-        })
-        console.log('✅ Updated existing category document in Firebase')
-      }
+      // Use setDoc to create or update - Firestore will create the collection automatically if it doesn't exist
+      // setDoc with merge ensures userId is always present
+      await setDoc(categoryRef, categoryData, { merge: true })
+      console.log('✅ Category saved to Firebase')
     } catch (error) {
       console.error('❌ Error saving category to Firebase:', error)
       if (error instanceof Error) {

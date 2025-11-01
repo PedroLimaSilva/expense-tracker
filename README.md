@@ -53,45 +53,44 @@ A Progressive Web App (PWA) for tracking personal expenses that works offline an
    ```javascript
    rules_version = '2';
    service cloud.firestore {
-     match /databases/{database}/documents {
-       match /expenses/{expenseId} {
-         // Allow read if user is authenticated and owns the expense
-         allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      match /databases/{database}/documents {
          
-         // Allow create if user is authenticated and sets their own userId
-         allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+         // Helper function for common auth checks
+         function isSignedIn() {
+            return request.auth != null;
+         }
+
+         function isResourceAuthor() {
+            return isSignedIn() && request.auth.uid == resource.data.userId;
+         }
+
+         function isRequestAuthor() {
+            return isSignedIn() && request.auth.uid == request.resource.data.userId;
+         }
+
+         // Expenses
+         match /expenses/{expenseId} {
+            allow read, update, delete: if isResourceAuthor();
+            allow create: if isRequestAuthor();
+         }
          
-         // Allow update/delete if user is authenticated and owns the expense
-         allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
-       }
-       
-       match /income/{incomeId} {
-         // Allow read if user is authenticated and owns the income
-         allow read: if request.auth != null && request.auth.uid == resource.data.userId;
-         
-         // Allow create if user is authenticated and sets their own userId
-         allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-         
-         // Allow update/delete if user is authenticated and owns the income
-         allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
-       }
-       
-       match /categories/{categoryId} {
-         // Allow read if user is authenticated and owns the category
-         allow read: if request.auth != null && request.auth.uid == resource.data.userId;
-         
-         // Allow create if user is authenticated and sets their own userId
-         allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-         
-         // Allow update/delete if user is authenticated and owns the category
-         allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
-       }
-       
-       match /userPreferences/{userId} {
-         // Allow users to read and write their own preferences
-         allow read, write: if request.auth != null && request.auth.uid == userId;
-       }
-     }
+         // Income
+         match /income/{incomeId} {
+            allow read, update, delete: if isResourceAuthor();
+            allow create: if isRequestAuthor();
+         }
+
+         // Categories
+         match /categories/{categoryId} {
+            allow read, update, delete: if isResourceAuthor();
+            allow create: if isRequestAuthor();
+         }
+
+         // User preferences (special case)
+         match /userPreferences/{userId} {
+            allow read, write: if isSignedIn() && request.auth.uid == userId;
+         }
+      }
    }
    ```
    
