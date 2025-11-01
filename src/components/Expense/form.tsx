@@ -1,16 +1,16 @@
 import { useState, type FormEvent, useEffect } from 'react'
-import { type Income, type IncomeFormData } from '../types/income'
-import { useCategories } from '../contexts/CategoryContext'
-import './IncomeForm.scss'
+import { type Expense, type ExpenseFormData } from '../../types/expense'
+import { useCategories } from '../../contexts/CategoryContext'
+import './form.scss'
 
-interface IncomeFormProps {
-  income?: Income | null
-  onSubmit: (data: IncomeFormData) => Promise<void>
+interface ExpenseFormProps {
+  expense?: Expense | null
+  onSubmit: (data: ExpenseFormData) => Promise<void>
   onCancel: () => void
 }
 
-export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
-  const { incomeCategories, loading: categoriesLoading } = useCategories()
+export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
+  const { expenseCategories, loading: categoriesLoading } = useCategories()
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('')
@@ -18,19 +18,19 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (incomeCategories.length > 0 && !category) {
-      setCategory(incomeCategories[0].name)
+    if (expenseCategories.length > 0 && !category) {
+      setCategory(expenseCategories[0].name)
     }
-  }, [incomeCategories, category])
+  }, [expenseCategories, category])
 
   useEffect(() => {
-    if (income) {
-      setDescription(income.description)
-      setAmount(income.amount.toString())
-      setCategory(income.category)
-      setDate(income.date)
+    if (expense) {
+      setDescription(expense.description)
+      setAmount(expense.amount.toString())
+      setCategory(expense.category)
+      setDate(expense.date)
     }
-  }, [income])
+  }, [expense])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -52,15 +52,15 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
         category,
         date
       })
-      // Reset form if new income
-      if (!income && incomeCategories.length > 0) {
+      // Reset form if new expense
+      if (!expense && expenseCategories.length > 0) {
         setDescription('')
         setAmount('')
-        setCategory(incomeCategories[0].name)
+        setCategory(expenseCategories[0].name)
         setDate(new Date().toISOString().split('T')[0])
       }
     } catch (error) {
-      console.error('Error submitting income:', error)
+      console.error('Error submitting expense:', error)
     } finally {
       setLoading(false)
     }
@@ -69,7 +69,7 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
   return (
     <div className="expense-form-container">
       <form onSubmit={handleSubmit} className="expense-form">
-        <h3>{income ? 'Edit Income' : 'Add Income'}</h3>
+        <h3>{expense ? 'Edit Expense' : 'Add Expense'}</h3>
         
         <div className="form-group">
           <label htmlFor="description">Description</label>
@@ -80,7 +80,7 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
             onChange={(e) => setDescription(e.target.value)}
             required
             disabled={loading}
-            placeholder="Enter income description"
+            placeholder="Enter expense description"
           />
         </div>
 
@@ -111,12 +111,12 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               required
-              disabled={loading || incomeCategories.length === 0}
+              disabled={loading || expenseCategories.length === 0}
             >
-              {incomeCategories.length === 0 ? (
+              {expenseCategories.length === 0 ? (
                 <option>No categories available</option>
               ) : (
-                incomeCategories.map(cat => (
+                expenseCategories.map(cat => (
                   <option key={cat.id} value={cat.name}>{cat.name}</option>
                 ))
               )}
@@ -138,7 +138,7 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
 
         <div className="form-actions">
           <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? 'Saving...' : (income ? 'Update' : 'Add')}
+            {loading ? 'Saving...' : (expense ? 'Update' : 'Add')}
           </button>
           <button type="button" onClick={onCancel} className="btn btn-secondary" disabled={loading}>
             Cancel

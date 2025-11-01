@@ -101,7 +101,19 @@ A Progressive Web App (PWA) for tracking personal expenses that works offline an
    yarn dev
    ```
 
-7. **Build for production:**
+7. **Access from your phone (local network):**
+   - Make sure your phone and computer are on the same Wi-Fi network
+   - Find your computer's local IP address:
+     - **macOS/Linux**: Run `ipconfig getifaddr en0` or `hostname -I`
+     - **Windows**: Run `ipconfig` and look for IPv4 address
+   - On your phone's browser, go to: `http://YOUR_IP_ADDRESS:5173`
+     - Example: `http://192.168.1.100:5173`
+   - The app should load on your phone!
+   - **Install as PWA**: On your phone browser, look for "Add to Home Screen" or "Install App" option
+
+   **Note:** Firebase requests work exactly the same from your phone - they're just HTTP requests. Make sure your phone can access the internet for Firebase to work.
+
+8. **Build for production:**
    ```bash
    yarn build
    ```

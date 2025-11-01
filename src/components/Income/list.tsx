@@ -1,6 +1,6 @@
-import { type Income } from '../types/income'
-import { useCurrency } from '../contexts/CurrencyContext'
-import './IncomeList.scss'
+import { type Income } from '../../types/income'
+import { useCurrency } from '../../contexts/CurrencyContext'
+import './list.scss'
 
 interface IncomeListProps {
   income: Income[]

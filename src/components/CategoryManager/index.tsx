@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { useCategories } from '../contexts/CategoryContext'
-import { type Category } from '../types/category'
-import './CategoryManager.scss'
+import { useCategories } from '../../contexts/CategoryContext'
+import { type Category } from '../../types/category'
+import './index.scss'
 
 type CategoryType = 'expense' | 'income'
 

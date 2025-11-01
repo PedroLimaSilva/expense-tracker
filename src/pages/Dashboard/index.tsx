@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { useCurrency } from '../contexts/CurrencyContext'
-import { useCategories } from '../contexts/CategoryContext'
-import { useTheme } from '../contexts/ThemeContext'
-import { expenseService } from '../services/expenseService'
-import { incomeService } from '../services/incomeService'
-import { syncService } from '../services/syncService'
-import { type Expense, type ExpenseFormData } from '../types/expense'
-import { type Income, type IncomeFormData } from '../types/income'
-import { ExpenseList } from './ExpenseList'
-import { IncomeList } from './IncomeList'
-import { ExpenseForm } from './ExpenseForm'
-import { IncomeForm } from './IncomeForm'
-import { CurrencySelector } from './CurrencySelector'
-import { CategoryManager } from './CategoryManager'
-import './Dashboard.scss'
+import { useAuth } from '../../contexts/AuthContext'
+import { useCurrency } from '../../contexts/CurrencyContext'
+import { useCategories } from '../../contexts/CategoryContext'
+import { useTheme } from '../../contexts/ThemeContext'
+import { expenseService } from '../../services/expenseService'
+import { incomeService } from '../../services/incomeService'
+import { syncService } from '../../services/syncService'
+import { type Expense, type ExpenseFormData } from '../../types/expense'
+import { type Income, type IncomeFormData } from '../../types/income'
+import { ExpenseList } from '../../components/Expense/list'
+import { IncomeList } from '../../components/Income/list'
+import { ExpenseForm } from '../../components/Expense/form'
+import { IncomeForm } from '../../components/Income/form'
+import { CurrencySelector } from '../../components/CurrencySelector'
+import { CategoryManager } from '../../components/CategoryManager'
+import './index.scss'
 
 type ViewType = 'expenses' | 'income' | 'overview' | 'categories'
 
@@ -246,8 +246,8 @@ export function Dashboard() {
             ) : (
               <span className="status-badge offline" title="Offline">Offline</span>
             )}
-            <button 
-              onClick={syncData} 
+            <button
+              onClick={syncData}
               disabled={syncing || !online}
               className="btn btn-small btn-secondary"
               title="Sync with cloud"
@@ -323,9 +323,9 @@ export function Dashboard() {
                     <p className="balance-amount">{formatCurrency(netIncome)}</p>
                   </div>
                 </div>
-                
+
                 <div className="dashboard-actions">
-                  <button 
+                  <button
                     onClick={() => {
                       setEditingIncome(null)
                       setEditingExpense(null)
@@ -336,7 +336,7 @@ export function Dashboard() {
                   >
                     + Add Income
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setEditingIncome(null)
                       setEditingExpense(null)
@@ -355,7 +355,7 @@ export function Dashboard() {
             {view === 'income' && (
               <>
                 <div className="dashboard-actions">
-                  <button 
+                  <button
                     onClick={() => {
                       setEditingIncome(null)
                       setShowForm(true)
@@ -377,7 +377,7 @@ export function Dashboard() {
             {view === 'expenses' && (
               <>
                 <div className="dashboard-actions">
-                  <button 
+                  <button
                     onClick={() => {
                       setEditingExpense(null)
                       setShowForm(true)

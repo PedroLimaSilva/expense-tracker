@@ -1,6 +1,6 @@
-import { type Expense } from '../types/expense'
-import { useCurrency } from '../contexts/CurrencyContext'
-import './ExpenseList.scss'
+import { type Expense } from '../../types/expense'
+import { useCurrency } from '../../contexts/CurrencyContext'
+import './list.scss'
 
 interface ExpenseListProps {
   expenses: Expense[]

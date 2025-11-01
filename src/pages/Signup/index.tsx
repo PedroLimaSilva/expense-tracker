@@ -1,26 +1,31 @@
 import { useState, type FormEvent } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import { useNavigate, Link } from 'react-router-dom'
-import './Login.scss'
+import './index.scss'
 
-export function Login() {
+export function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { signup } = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    
+
+    if (password !== confirmPassword) {
+      return setError('Passwords do not match')
+    }
+
     try {
       setError('')
       setLoading(true)
-      await login(email, password)
+      await signup(email, password)
       navigate('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to log in')
+      setError(err instanceof Error ? err.message : 'Failed to create an account')
     } finally {
       setLoading(false)
     }
@@ -29,7 +34,7 @@ export function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Login</h2>
+        <h2>Sign Up</h2>
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -48,20 +53,34 @@ export function Login() {
             <label htmlFor="password">Password</label>
             <input
               id="password"
-              autoComplete="current-password"
               type="password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
+              minLength={6}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              autoComplete="confirm-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              disabled={loading}
+              minLength={6}
             />
           </div>
           <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Creating account...' : 'Sign Up'}
           </button>
         </form>
         <p className="auth-link">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+          Already have an account? <Link to="/login">Log in</Link>
         </p>
       </div>
     </div>
