@@ -382,6 +382,115 @@ body {
   color: #666;
 }
 
+/* View Tabs */
+.view-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: #007bff;
+}
+
+.tab.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+}
+
+/* Overview */
+.overview-section {
+  margin-bottom: 2rem;
+}
+
+.balance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.balance-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.balance-card h3 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balance-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.income-card {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.income-card h3,
+.income-card .balance-amount {
+  color: white;
+}
+
+.expense-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.expense-card h3,
+.expense-card .balance-amount {
+  color: white;
+}
+
+.net-card {
+  background: #f8f9fa;
+}
+
+.net-card.positive {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.net-card.positive h3,
+.net-card.positive .balance-amount {
+  color: white;
+}
+
+.net-card.negative {
+  background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+  color: white;
+}
+
+.net-card.negative h3,
+.net-card.negative .balance-amount {
+  color: white;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .dashboard-header {
@@ -415,5 +524,24 @@ body {
 
   .expense-summary .total-amount {
     font-size: 2rem;
+  }
+
+  .balance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-amount {
+    font-size: 1.5rem;
+  }
+
+  .view-tabs {
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    flex: 1;
+    min-width: 100px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
   }
 }

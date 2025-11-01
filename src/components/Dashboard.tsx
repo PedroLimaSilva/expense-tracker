@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import { expenseService } from '../services/expenseService'
+import { incomeService } from '../services/incomeService'
 import { syncService } from '../services/syncService'
 import { type Expense, type ExpenseFormData } from '../types/expense'
+import { type Income, type IncomeFormData } from '../types/income'
 import { ExpenseList } from './ExpenseList'
+import { IncomeList } from './IncomeList'
 import { ExpenseForm } from './ExpenseForm'
+import { IncomeForm } from './IncomeForm'
 import { CurrencySelector } from './CurrencySelector'
+
+type ViewType = 'expenses' | 'income' | 'overview'
 
 export function Dashboard() {
   const { currentUser, logout } = useAuth()
+  const { formatCurrency } = useCurrency()
   const [expenses, setExpenses] = useState<Expense[]>([])
+  const [income, setIncome] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
+  const [view, setView] = useState<ViewType>('overview')
   const [showForm, setShowForm] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+  const [editingIncome, setEditingIncome] = useState<Income | null>(null)
   const [online, setOnline] = useState(navigator.onLine)
 
   useEffect(() => {
@@ -38,7 +49,7 @@ export function Dashboard() {
   useEffect(() => {
     if (!currentUser) return
 
-    loadExpenses()
+    loadData()
     const unsubscribe = setupSyncListener()
 
     return () => {
@@ -48,15 +59,19 @@ export function Dashboard() {
     }
   }, [currentUser])
 
-  async function loadExpenses() {
+  async function loadData() {
     if (!currentUser) return
 
     try {
       setLoading(true)
-      const userExpenses = await expenseService.getExpenses(currentUser.uid)
+      const [userExpenses, userIncome] = await Promise.all([
+        expenseService.getExpenses(currentUser.uid),
+        incomeService.getIncome(currentUser.uid)
+      ])
       setExpenses(userExpenses)
+      setIncome(userIncome)
     } catch (error) {
-      console.error('Error loading expenses:', error)
+      console.error('Error loading data:', error)
     } finally {
       setLoading(false)
     }
@@ -65,7 +80,7 @@ export function Dashboard() {
   function setupSyncListener() {
     if (!currentUser) return
 
-    // Set up real-time listener for cloud changes
+    // Set up real-time listener for cloud changes (expenses)
     const unsubscribe = syncService.setupCloudListener(currentUser.uid, (updatedExpenses) => {
       setExpenses(updatedExpenses.sort((a, b) => {
         const dateA = new Date(a.date).getTime()
@@ -83,7 +98,7 @@ export function Dashboard() {
     try {
       setSyncing(true)
       await syncService.fullSync(currentUser.uid)
-      await loadExpenses()
+      await loadData()
     } catch (error) {
       console.error('Error syncing data:', error)
     } finally {
@@ -91,12 +106,13 @@ export function Dashboard() {
     }
   }
 
+  // Expense handlers
   async function handleAddExpense(data: ExpenseFormData) {
     if (!currentUser) return
 
     try {
       await expenseService.createExpense(currentUser.uid, data)
-      await loadExpenses()
+      await loadData()
       setShowForm(false)
     } catch (error) {
       console.error('Error adding expense:', error)
@@ -113,7 +129,7 @@ export function Dashboard() {
         ...data
       }
       await expenseService.updateExpense(updatedExpense)
-      await loadExpenses()
+      await loadData()
       setEditingExpense(null)
       setShowForm(false)
     } catch (error) {
@@ -125,26 +141,81 @@ export function Dashboard() {
   async function handleDeleteExpense(expenseId: string) {
     try {
       await expenseService.deleteExpense(expenseId)
-      await loadExpenses()
+      await loadData()
     } catch (error) {
       console.error('Error deleting expense:', error)
     }
   }
 
-  function handleEdit(expense: Expense) {
+  function handleEditExpense(expense: Expense) {
     setEditingExpense(expense)
+    setEditingIncome(null)
+    setView('expenses')
+    setShowForm(true)
+  }
+
+  // Income handlers
+  async function handleAddIncome(data: IncomeFormData) {
+    if (!currentUser) return
+
+    try {
+      await incomeService.createIncome(currentUser.uid, data)
+      await loadData()
+      setShowForm(false)
+    } catch (error) {
+      console.error('Error adding income:', error)
+      throw error
+    }
+  }
+
+  async function handleUpdateIncome(data: IncomeFormData) {
+    if (!editingIncome) return
+
+    try {
+      const updatedIncome: Income = {
+        ...editingIncome,
+        ...data
+      }
+      await incomeService.updateIncome(updatedIncome)
+      await loadData()
+      setEditingIncome(null)
+      setShowForm(false)
+    } catch (error) {
+      console.error('Error updating income:', error)
+      throw error
+    }
+  }
+
+  async function handleDeleteIncome(incomeId: string) {
+    try {
+      await incomeService.deleteIncome(incomeId)
+      await loadData()
+    } catch (error) {
+      console.error('Error deleting income:', error)
+    }
+  }
+
+  function handleEditIncome(income: Income) {
+    setEditingIncome(income)
+    setEditingExpense(null)
+    setView('income')
     setShowForm(true)
   }
 
   function handleCancelForm() {
     setShowForm(false)
     setEditingExpense(null)
+    setEditingIncome(null)
   }
+
+  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)
+  const totalIncome = income.reduce((sum, inc) => sum + inc.amount, 0)
+  const netIncome = totalIncome - totalExpenses
 
   if (loading) {
     return (
       <div className="dashboard">
-        <div className="loading">Loading expenses...</div>
+        <div className="loading">Loading...</div>
       </div>
     )
   }
@@ -178,26 +249,131 @@ export function Dashboard() {
 
       <main className="dashboard-main">
         {showForm ? (
-          <ExpenseForm
-            expense={editingExpense}
-            onSubmit={editingExpense ? handleUpdateExpense : handleAddExpense}
-            onCancel={handleCancelForm}
-          />
+          editingIncome ? (
+            <IncomeForm
+              income={editingIncome}
+              onSubmit={editingIncome ? handleUpdateIncome : handleAddIncome}
+              onCancel={handleCancelForm}
+            />
+          ) : (
+            <ExpenseForm
+              expense={editingExpense}
+              onSubmit={editingExpense ? handleUpdateExpense : handleAddExpense}
+              onCancel={handleCancelForm}
+            />
+          )
         ) : (
           <>
-            <div className="dashboard-actions">
-              <button 
-                onClick={() => setShowForm(true)}
-                className="btn btn-primary"
+            {/* Tabs */}
+            <div className="view-tabs">
+              <button
+                className={`tab ${view === 'overview' ? 'active' : ''}`}
+                onClick={() => setView('overview')}
               >
-                + Add Expense
+                Overview
+              </button>
+              <button
+                className={`tab ${view === 'income' ? 'active' : ''}`}
+                onClick={() => setView('income')}
+              >
+                Income
+              </button>
+              <button
+                className={`tab ${view === 'expenses' ? 'active' : ''}`}
+                onClick={() => setView('expenses')}
+              >
+                Expenses
               </button>
             </div>
-            <ExpenseList
-              expenses={expenses}
-              onEdit={handleEdit}
-              onDelete={handleDeleteExpense}
-            />
+
+            {/* Overview */}
+            {view === 'overview' && (
+              <div className="overview-section">
+                <div className="balance-summary">
+                  <div className="balance-card income-card">
+                    <h3>Total Income</h3>
+                    <p className="balance-amount">{formatCurrency(totalIncome)}</p>
+                  </div>
+                  <div className="balance-card expense-card">
+                    <h3>Total Expenses</h3>
+                    <p className="balance-amount">{formatCurrency(totalExpenses)}</p>
+                  </div>
+                  <div className={`balance-card net-card ${netIncome >= 0 ? 'positive' : 'negative'}`}>
+                    <h3>Net Income</h3>
+                    <p className="balance-amount">{formatCurrency(netIncome)}</p>
+                  </div>
+                </div>
+                
+                <div className="dashboard-actions">
+                  <button 
+                    onClick={() => {
+                      setEditingIncome(null)
+                      setEditingExpense(null)
+                      setView('income')
+                      setShowForm(true)
+                    }}
+                    className="btn btn-primary"
+                  >
+                    + Add Income
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setEditingIncome(null)
+                      setEditingExpense(null)
+                      setView('expenses')
+                      setShowForm(true)
+                    }}
+                    className="btn btn-primary"
+                  >
+                    + Add Expense
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Income View */}
+            {view === 'income' && (
+              <>
+                <div className="dashboard-actions">
+                  <button 
+                    onClick={() => {
+                      setEditingIncome(null)
+                      setShowForm(true)
+                    }}
+                    className="btn btn-primary"
+                  >
+                    + Add Income
+                  </button>
+                </div>
+                <IncomeList
+                  income={income}
+                  onEdit={handleEditIncome}
+                  onDelete={handleDeleteIncome}
+                />
+              </>
+            )}
+
+            {/* Expenses View */}
+            {view === 'expenses' && (
+              <>
+                <div className="dashboard-actions">
+                  <button 
+                    onClick={() => {
+                      setEditingExpense(null)
+                      setShowForm(true)
+                    }}
+                    className="btn btn-primary"
+                  >
+                    + Add Expense
+                  </button>
+                </div>
+                <ExpenseList
+                  expenses={expenses}
+                  onEdit={handleEditExpense}
+                  onDelete={handleDeleteExpense}
+                />
+              </>
+            )}
           </>
         )}
       </main>

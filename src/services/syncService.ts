@@ -15,6 +15,7 @@ import { db as firestoreDb } from '../config/firebase'
 import { auth } from '../config/firebase'
 import { db as indexedDb } from '../db/indexeddb'
 import { type Expense } from '../types/expense'
+import { type Income } from '../types/income'
 
 class SyncService {
   private syncInProgress = false
@@ -177,8 +178,156 @@ class SyncService {
     try {
       await this.syncToCloud(userId)
       await this.syncFromCloud(userId)
+      await this.syncIncomeToCloud(userId)
+      await this.syncIncomeFromCloud(userId)
     } catch (error) {
       console.error('Error in full sync:', error)
+      throw error
+    }
+  }
+
+  // ========== INCOME SYNC METHODS ==========
+
+  // Get all income for a user from Firestore
+  async fetchIncomeFromCloud(userId: string): Promise<Income[]> {
+    try {
+      const incomeRef = collection(firestoreDb, 'income')
+      const q = query(incomeRef, where('userId', '==', userId))
+      const querySnapshot = await getDocs(q)
+      
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date instanceof Timestamp ? data.date.toDate().toISOString().split('T')[0] : data.date,
+          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
+          updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toMillis() : data.updatedAt,
+          synced: true,
+          userId
+        } as Income
+      })
+    } catch (error) {
+      console.error('Error fetching income from cloud:', error)
+      throw error
+    }
+  }
+
+  // Save income to Firestore
+  async saveIncomeToCloud(income: Income): Promise<void> {
+    try {
+      // Check authentication state
+      const currentUser = auth.currentUser
+      if (!currentUser) {
+        throw new Error('User not authenticated')
+      }
+      
+      if (currentUser.uid !== income.userId) {
+        throw new Error(`User ID mismatch: auth.uid=${currentUser.uid}, income.userId=${income.userId}`)
+      }
+      
+      const incomeRef = doc(firestoreDb, 'income', income.id)
+      const incomeDoc = await getDoc(incomeRef)
+      
+      const incomeData = {
+        id: income.id,
+        description: income.description,
+        amount: income.amount,
+        category: income.category,
+        date: income.date,
+        createdAt: Timestamp.fromMillis(income.createdAt),
+        updatedAt: Timestamp.fromMillis(income.updatedAt),
+        userId: income.userId
+      }
+      
+      console.log('📤 Attempting to save income to Firebase:', {
+        id: income.id,
+        userId: income.userId,
+        authUid: currentUser.uid,
+        data: incomeData
+      })
+      
+      if (!incomeDoc.exists()) {
+        // Create new document
+        await setDoc(incomeRef, incomeData)
+        console.log('✅ Created new income document in Firebase')
+      } else {
+        // Update existing document
+        await updateDoc(incomeRef, {
+          description: income.description,
+          amount: income.amount,
+          category: income.category,
+          date: income.date,
+          updatedAt: Timestamp.now(),
+          userId: income.userId
+        })
+        console.log('✅ Updated existing income document in Firebase')
+      }
+    } catch (error) {
+      console.error('❌ Error saving income to Firebase:', error)
+      if (error instanceof Error) {
+        console.error('Error code:', (error as any).code)
+        console.error('Error message:', error.message)
+        console.error('Full error:', error)
+      }
+      throw error
+    }
+  }
+
+  // Delete income from Firestore
+  async deleteIncomeFromCloud(incomeId: string): Promise<void> {
+    try {
+      const incomeRef = doc(firestoreDb, 'income', incomeId)
+      await deleteDoc(incomeRef)
+    } catch (error) {
+      console.error('Error deleting income from cloud:', error)
+      throw error
+    }
+  }
+
+  // Sync local income changes to cloud
+  async syncIncomeToCloud(userId: string): Promise<void> {
+    if (this.syncInProgress) return
+    
+    try {
+      const allIncome = await indexedDb.income.where('userId').equals(userId).toArray()
+      const unsyncedIncome = allIncome.filter(income => !income.synced)
+
+      const updates: Promise<void>[] = []
+
+      for (const income of unsyncedIncome) {
+        try {
+          await this.saveIncomeToCloud(income)
+          // Mark as synced in IndexedDB
+          updates.push(
+            indexedDb.income.update(income.id, { synced: true }).then(() => {})
+          )
+        } catch (error) {
+          console.error(`Error syncing income ${income.id}:`, error)
+        }
+      }
+
+      await Promise.all(updates)
+    } catch (error) {
+      console.error('Error syncing income to cloud:', error)
+      throw error
+    }
+  }
+
+  // Sync cloud income changes to local
+  async syncIncomeFromCloud(userId: string): Promise<void> {
+    try {
+      const cloudIncome = await this.fetchIncomeFromCloud(userId)
+      
+      // Update or insert income in IndexedDB
+      for (const income of cloudIncome) {
+        const existing = await indexedDb.income.get(income.id)
+        if (!existing || income.updatedAt > existing.updatedAt) {
+          await indexedDb.income.put({ ...income, synced: true })
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing income from cloud:', error)
       throw error
     }
   }
