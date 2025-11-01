@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useCategories } from '../contexts/CategoryContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { expenseService } from '../services/expenseService'
 import { incomeService } from '../services/incomeService'
 import { syncService } from '../services/syncService'
@@ -13,6 +14,7 @@ import { ExpenseForm } from './ExpenseForm'
 import { IncomeForm } from './IncomeForm'
 import { CurrencySelector } from './CurrencySelector'
 import { CategoryManager } from './CategoryManager'
+import './Dashboard.scss'
 
 type ViewType = 'expenses' | 'income' | 'overview' | 'categories'
 
@@ -20,6 +22,7 @@ export function Dashboard() {
   const { currentUser, logout } = useAuth()
   const { formatCurrency } = useCurrency()
   const { refreshCategories } = useCategories()
+  const { theme, toggleTheme } = useTheme()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [income, setIncome] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
@@ -230,6 +233,13 @@ export function Dashboard() {
         <h1>Expense Tracker</h1>
         <div className="header-actions">
           <CurrencySelector />
+          <button
+            onClick={toggleTheme}
+            className="btn btn-small btn-secondary theme-toggle"
+            title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           <div className="status-indicators">
             {online ? (
               <span className="status-badge online" title="Online">Online</span>

@@ -1,5 +1,6 @@
 import { useCurrency } from '../contexts/CurrencyContext'
 import { CURRENCIES, type CurrencyCode } from '../utils/currency'
+import './CurrencySelector.scss'
 
 export function CurrencySelector() {
   const { currency, setCurrency } = useCurrency()

@@ -1,6 +1,7 @@
 import { useState, type FormEvent, useEffect } from 'react'
 import { type Income, type IncomeFormData } from '../types/income'
 import { useCategories } from '../contexts/CategoryContext'
+import './IncomeForm.scss'
 
 interface IncomeFormProps {
   income?: Income | null

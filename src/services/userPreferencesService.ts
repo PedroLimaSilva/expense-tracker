@@ -2,8 +2,11 @@ import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore'
 import { db as firestoreDb } from '../config/firebase'
 import { type CurrencyCode, detectCurrencyFromLocale } from '../utils/currency'
 
+type Theme = 'light' | 'dark'
+
 interface UserPreferences {
   currency: CurrencyCode
+  theme?: Theme
   updatedAt: number
 }
 
@@ -18,6 +21,7 @@ class UserPreferencesService {
         const data = prefsDoc.data()
         return {
           currency: data.currency as CurrencyCode,
+          theme: data.theme as Theme | undefined,
           updatedAt: data.updatedAt instanceof Timestamp 
             ? data.updatedAt.toMillis() 
             : data.updatedAt
@@ -72,6 +76,38 @@ class UserPreferencesService {
       await this.savePreferences(userId, currency)
     } catch (error) {
       console.error('Error setting currency preference:', error)
+      throw error
+    }
+  }
+
+  // Get theme preference (with fallback)
+  async getTheme(userId: string | null): Promise<Theme | null> {
+    if (!userId) {
+      return null
+    }
+
+    try {
+      const preferences = await this.getPreferences(userId)
+      if (preferences?.theme) {
+        return preferences.theme
+      }
+    } catch (error) {
+      console.error('Error loading theme preference:', error)
+    }
+
+    return null
+  }
+
+  // Update theme preference
+  async setTheme(userId: string, theme: Theme): Promise<void> {
+    try {
+      const prefsRef = doc(firestoreDb, 'userPreferences', userId)
+      await setDoc(prefsRef, {
+        theme,
+        updatedAt: Timestamp.now()
+      }, { merge: true })
+    } catch (error) {
+      console.error('Error setting theme preference:', error)
       throw error
     }
   }

@@ -1,6 +1,7 @@
 import { useState, type FormEvent, useEffect } from 'react'
 import { type Expense, type ExpenseFormData } from '../types/expense'
 import { useCategories } from '../contexts/CategoryContext'
+import './ExpenseForm.scss'
 
 interface ExpenseFormProps {
   expense?: Expense | null
