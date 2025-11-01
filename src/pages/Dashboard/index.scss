@@ -1,5 +1,4 @@
 .dashboard {
-  min-height: 100vh;
   background-color: var(--bg-primary);
 }
 
@@ -13,7 +12,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-md);
-  
+
   h1 {
     font-size: 1.75rem;
     color: var(--text-primary);
@@ -39,12 +38,12 @@
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
-  
+
   &.online {
     background-color: var(--status-online-bg);
     color: var(--status-online-text);
   }
-  
+
   &.offline {
     background-color: var(--status-offline-bg);
     color: var(--status-offline-text);
@@ -62,6 +61,8 @@
   gap: var(--spacing-xs);
   margin-bottom: var(--spacing-lg);
   border-bottom: 2px solid var(--border-color);
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .tab {
@@ -75,11 +76,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: -2px;
-  
+
   &:hover {
     color: var(--primary);
   }
-  
+
   &.active {
     color: var(--primary);
     border-bottom-color: var(--primary);
@@ -102,7 +103,7 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-md);
-  
+
   h3 {
     font-size: 0.875rem;
     font-weight: 500;
@@ -111,20 +112,20 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
-  
+
   &.income-card {
     border-left: 4px solid var(--success);
   }
-  
+
   &.expense-card {
     border-left: 4px solid var(--danger);
   }
-  
+
   &.net-card {
     &.positive {
       border-left: 4px solid var(--success);
     }
-    
+
     &.negative {
       border-left: 4px solid var(--danger);
     }
@@ -155,4 +156,3 @@
   font-size: 1.25rem;
   line-height: 1;
 }
-

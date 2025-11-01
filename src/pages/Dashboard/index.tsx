@@ -232,7 +232,6 @@ export function Dashboard() {
       <header className="dashboard-header">
         <h1>Expense Tracker</h1>
         <div className="header-actions">
-          <CurrencySelector />
           <button
             onClick={toggleTheme}
             className="btn btn-small btn-secondary theme-toggle"
@@ -258,6 +257,7 @@ export function Dashboard() {
           <button onClick={logout} className="btn btn-secondary">
             Logout
           </button>
+          {/* <CurrencySelector /> */}
         </div>
       </header>
 
@@ -309,21 +309,6 @@ export function Dashboard() {
             {/* Overview */}
             {view === 'overview' && (
               <div className="overview-section">
-                <div className="balance-summary">
-                  <div className="balance-card income-card">
-                    <h3>Total Income</h3>
-                    <p className="balance-amount">{formatCurrency(totalIncome)}</p>
-                  </div>
-                  <div className="balance-card expense-card">
-                    <h3>Total Expenses</h3>
-                    <p className="balance-amount">{formatCurrency(totalExpenses)}</p>
-                  </div>
-                  <div className={`balance-card net-card ${netIncome >= 0 ? 'positive' : 'negative'}`}>
-                    <h3>Net Income</h3>
-                    <p className="balance-amount">{formatCurrency(netIncome)}</p>
-                  </div>
-                </div>
-
                 <div className="dashboard-actions">
                   <button
                     onClick={() => {
@@ -347,6 +332,21 @@ export function Dashboard() {
                   >
                     + Add Expense
                   </button>
+                </div>
+
+                <div className="balance-summary">
+                  <div className="balance-card income-card">
+                    <h3>Total Income</h3>
+                    <p className="balance-amount">{formatCurrency(totalIncome)}</p>
+                  </div>
+                  <div className="balance-card expense-card">
+                    <h3>Total Expenses</h3>
+                    <p className="balance-amount">{formatCurrency(totalExpenses)}</p>
+                  </div>
+                  <div className={`balance-card net-card ${netIncome >= 0 ? 'positive' : 'negative'}`}>
+                    <h3>Net Income</h3>
+                    <p className="balance-amount">{formatCurrency(netIncome)}</p>
+                  </div>
                 </div>
               </div>
             )}
