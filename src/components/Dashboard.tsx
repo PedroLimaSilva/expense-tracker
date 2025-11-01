@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useCategories } from '../contexts/CategoryContext'
 import { expenseService } from '../services/expenseService'
 import { incomeService } from '../services/incomeService'
 import { syncService } from '../services/syncService'
@@ -11,12 +12,14 @@ import { IncomeList } from './IncomeList'
 import { ExpenseForm } from './ExpenseForm'
 import { IncomeForm } from './IncomeForm'
 import { CurrencySelector } from './CurrencySelector'
+import { CategoryManager } from './CategoryManager'
 
-type ViewType = 'expenses' | 'income' | 'overview'
+type ViewType = 'expenses' | 'income' | 'overview' | 'categories'
 
 export function Dashboard() {
   const { currentUser, logout } = useAuth()
   const { formatCurrency } = useCurrency()
+  const { refreshCategories } = useCategories()
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [income, setIncome] = useState<Income[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,6 +102,7 @@ export function Dashboard() {
       setSyncing(true)
       await syncService.fullSync(currentUser.uid)
       await loadData()
+      await refreshCategories() // Refresh categories after sync
     } catch (error) {
       console.error('Error syncing data:', error)
     } finally {
@@ -284,6 +288,12 @@ export function Dashboard() {
               >
                 Expenses
               </button>
+              <button
+                className={`tab ${view === 'categories' ? 'active' : ''}`}
+                onClick={() => setView('categories')}
+              >
+                Categories
+              </button>
             </div>
 
             {/* Overview */}
@@ -373,6 +383,11 @@ export function Dashboard() {
                   onDelete={handleDeleteExpense}
                 />
               </>
+            )}
+
+            {/* Categories View */}
+            {view === 'categories' && (
+              <CategoryManager />
             )}
           </>
         )}

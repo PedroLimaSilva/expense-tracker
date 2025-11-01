@@ -1,5 +1,6 @@
 import { useState, type FormEvent, useEffect } from 'react'
 import { type Expense, type ExpenseFormData } from '../types/expense'
+import { useCategories } from '../contexts/CategoryContext'
 
 interface ExpenseFormProps {
   expense?: Expense | null
@@ -7,23 +8,19 @@ interface ExpenseFormProps {
   onCancel: () => void
 }
 
-const CATEGORIES = [
-  'Food',
-  'Transport',
-  'Shopping',
-  'Bills',
-  'Entertainment',
-  'Health',
-  'Education',
-  'Other'
-]
-
 export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
+  const { expenseCategories, loading: categoriesLoading } = useCategories()
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState(CATEGORIES[0])
+  const [category, setCategory] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (expenseCategories.length > 0 && !category) {
+      setCategory(expenseCategories[0].name)
+    }
+  }, [expenseCategories, category])
 
   useEffect(() => {
     if (expense) {
@@ -55,10 +52,10 @@ export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
         date
       })
       // Reset form if new expense
-      if (!expense) {
+      if (!expense && expenseCategories.length > 0) {
         setDescription('')
         setAmount('')
-        setCategory(CATEGORIES[0])
+        setCategory(expenseCategories[0].name)
         setDate(new Date().toISOString().split('T')[0])
       }
     } catch (error) {
@@ -103,17 +100,27 @@ export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
 
         <div className="form-group">
           <label htmlFor="category">Category</label>
-          <select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-            disabled={loading}
-          >
-            {CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          {categoriesLoading ? (
+            <select id="category" disabled>
+              <option>Loading categories...</option>
+            </select>
+          ) : (
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              disabled={loading || expenseCategories.length === 0}
+            >
+              {expenseCategories.length === 0 ? (
+                <option>No categories available</option>
+              ) : (
+                expenseCategories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))
+              )}
+            </select>
+          )}
         </div>
 
         <div className="form-group">

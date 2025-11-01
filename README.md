@@ -76,6 +76,17 @@ A Progressive Web App (PWA) for tracking personal expenses that works offline an
          allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
        }
        
+       match /categories/{categoryId} {
+         // Allow read if user is authenticated and owns the category
+         allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+         
+         // Allow create if user is authenticated and sets their own userId
+         allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+         
+         // Allow update/delete if user is authenticated and owns the category
+         allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+       }
+       
        match /userPreferences/{userId} {
          // Allow users to read and write their own preferences
          allow read, write: if request.auth != null && request.auth.uid == userId;

@@ -16,6 +16,7 @@ import { auth } from '../config/firebase'
 import { db as indexedDb } from '../db/indexeddb'
 import { type Expense } from '../types/expense'
 import { type Income } from '../types/income'
+import { type Category } from '../types/category'
 
 class SyncService {
   private syncInProgress = false
@@ -180,6 +181,8 @@ class SyncService {
       await this.syncFromCloud(userId)
       await this.syncIncomeToCloud(userId)
       await this.syncIncomeFromCloud(userId)
+      await this.syncCategoriesToCloud(userId)
+      await this.syncCategoriesFromCloud(userId)
     } catch (error) {
       console.error('Error in full sync:', error)
       throw error
@@ -368,6 +371,147 @@ class SyncService {
     })
 
     return unsubscribe
+  }
+
+  // ========== CATEGORY SYNC METHODS ==========
+
+  // Get all categories for a user from Firestore
+  async fetchCategoriesFromCloud(userId: string): Promise<Category[]> {
+    try {
+      const categoriesRef = collection(firestoreDb, 'categories')
+      const q = query(categoriesRef, where('userId', '==', userId))
+      const querySnapshot = await getDocs(q)
+      
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data()
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
+          updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt.toMillis() : data.updatedAt,
+          synced: true,
+          userId
+        } as Category
+      })
+    } catch (error) {
+      console.error('Error fetching categories from cloud:', error)
+      throw error
+    }
+  }
+
+  // Save category to Firestore
+  async saveCategoryToCloud(category: Category): Promise<void> {
+    try {
+      const currentUser = auth.currentUser
+      if (!currentUser) {
+        throw new Error('User not authenticated')
+      }
+      
+      console.log('🔐 Category auth check:', {
+        currentUserId: currentUser.uid,
+        categoryUserId: category.userId,
+        match: currentUser.uid === category.userId
+      })
+      
+      if (currentUser.uid !== category.userId) {
+        throw new Error(`User ID mismatch: auth.uid=${currentUser.uid}, category.userId=${category.userId}`)
+      }
+      
+      const categoryRef = doc(firestoreDb, 'categories', category.id)
+      const categoryDoc = await getDoc(categoryRef)
+      
+      const categoryData = {
+        id: category.id,
+        name: category.name,
+        type: category.type,
+        userId: category.userId,
+        createdAt: Timestamp.fromMillis(category.createdAt),
+        updatedAt: Timestamp.fromMillis(category.updatedAt)
+      }
+      
+      console.log('📤 Attempting to save category to Firebase:', {
+        id: category.id,
+        name: category.name,
+        type: category.type,
+        userId: category.userId,
+        authUid: currentUser.uid,
+        data: categoryData
+      })
+      
+      if (!categoryDoc.exists()) {
+        await setDoc(categoryRef, categoryData)
+        console.log('✅ Created new category document in Firebase')
+      } else {
+        await updateDoc(categoryRef, {
+          name: category.name,
+          type: category.type,
+          updatedAt: Timestamp.now()
+        })
+        console.log('✅ Updated existing category document in Firebase')
+      }
+    } catch (error) {
+      console.error('❌ Error saving category to Firebase:', error)
+      if (error instanceof Error) {
+        console.error('Error code:', (error as any).code)
+        console.error('Error message:', error.message)
+        console.error('Full error:', error)
+      }
+      throw error
+    }
+  }
+
+  // Delete category from Firestore
+  async deleteCategoryFromCloud(categoryId: string): Promise<void> {
+    try {
+      const categoryRef = doc(firestoreDb, 'categories', categoryId)
+      await deleteDoc(categoryRef)
+    } catch (error) {
+      console.error('Error deleting category from cloud:', error)
+      throw error
+    }
+  }
+
+  // Sync local category changes to cloud
+  async syncCategoriesToCloud(userId: string): Promise<void> {
+    try {
+      const allCategories = await indexedDb.categories.where('userId').equals(userId).toArray()
+      const unsyncedCategories = allCategories.filter(category => !category.synced)
+
+      const updates: Promise<void>[] = []
+
+      for (const category of unsyncedCategories) {
+        try {
+          await this.saveCategoryToCloud(category)
+          updates.push(
+            indexedDb.categories.update(category.id, { synced: true }).then(() => {})
+          )
+        } catch (error) {
+          console.error(`Error syncing category ${category.id}:`, error)
+        }
+      }
+
+      await Promise.all(updates)
+    } catch (error) {
+      console.error('Error syncing categories to cloud:', error)
+      throw error
+    }
+  }
+
+  // Sync cloud category changes to local
+  async syncCategoriesFromCloud(userId: string): Promise<void> {
+    try {
+      const cloudCategories = await this.fetchCategoriesFromCloud(userId)
+      
+      for (const category of cloudCategories) {
+        const existing = await indexedDb.categories.get(category.id)
+        if (!existing || category.updatedAt > existing.updatedAt) {
+          await indexedDb.categories.put({ ...category, synced: true })
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing categories from cloud:', error)
+      throw error
+    }
   }
 }
 

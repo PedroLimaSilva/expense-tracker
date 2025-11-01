@@ -1,5 +1,6 @@
 import { useState, type FormEvent, useEffect } from 'react'
 import { type Income, type IncomeFormData } from '../types/income'
+import { useCategories } from '../contexts/CategoryContext'
 
 interface IncomeFormProps {
   income?: Income | null
@@ -7,22 +8,19 @@ interface IncomeFormProps {
   onCancel: () => void
 }
 
-const INCOME_CATEGORIES = [
-  'Salary',
-  'Freelance',
-  'Investment',
-  'Business',
-  'Rental',
-  'Gift',
-  'Other'
-]
-
 export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
+  const { incomeCategories, loading: categoriesLoading } = useCategories()
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState(INCOME_CATEGORIES[0])
+  const [category, setCategory] = useState('')
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (incomeCategories.length > 0 && !category) {
+      setCategory(incomeCategories[0].name)
+    }
+  }, [incomeCategories, category])
 
   useEffect(() => {
     if (income) {
@@ -54,10 +52,10 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
         date
       })
       // Reset form if new income
-      if (!income) {
+      if (!income && incomeCategories.length > 0) {
         setDescription('')
         setAmount('')
-        setCategory(INCOME_CATEGORIES[0])
+        setCategory(incomeCategories[0].name)
         setDate(new Date().toISOString().split('T')[0])
       }
     } catch (error) {
@@ -102,17 +100,27 @@ export function IncomeForm({ income, onSubmit, onCancel }: IncomeFormProps) {
 
         <div className="form-group">
           <label htmlFor="category">Category</label>
-          <select
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            required
-            disabled={loading}
-          >
-            {INCOME_CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
+          {categoriesLoading ? (
+            <select id="category" disabled>
+              <option>Loading categories...</option>
+            </select>
+          ) : (
+            <select
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              required
+              disabled={loading || incomeCategories.length === 0}
+            >
+              {incomeCategories.length === 0 ? (
+                <option>No categories available</option>
+              ) : (
+                incomeCategories.map(cat => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))
+              )}
+            </select>
+          )}
         </div>
 
         <div className="form-group">
