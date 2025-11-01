@@ -148,6 +148,8 @@ export function Dashboard() {
     try {
       await expenseService.deleteExpense(expenseId)
       await loadData()
+      setEditingExpense(null)
+      setShowForm(false)
     } catch (error) {
       console.error('Error deleting expense:', error)
     }
@@ -270,6 +272,7 @@ export function Dashboard() {
               expense={editingExpense}
               onSubmit={editingExpense ? handleUpdateExpense : handleAddExpense}
               onCancel={handleCancelForm}
+              onDelete={editingExpense ? handleDeleteExpense : undefined}
             />
           )
         ) : (

@@ -40,20 +40,40 @@
   padding: var(--spacing-md);
 }
 
+.expense-item-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-color);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
 .expense-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
-  transition: background-color 0.2s ease;
+  background: var(--surface);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  touch-action: pan-y;
+  user-select: none;
   
-  &:last-child {
-    border-bottom: none;
+  &.swiped {
+    cursor: default;
   }
   
-  &:hover {
+  &:hover:not(.swiped) {
     background-color: var(--surface-hover);
+  }
+  
+  &:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
   }
 }
 
@@ -109,9 +129,41 @@
   font-weight: 500;
 }
 
-.expense-item-actions {
+.expense-item-actions-swipe {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 80px;
   display: flex;
-  gap: var(--spacing-xs);
-  margin-left: var(--spacing-md);
+  align-items: center;
+  justify-content: center;
+  background-color: var(--danger);
+  z-index: 0;
+}
+
+.btn-delete-swipe {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  &:active {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .material-icons {
+    font-size: 1.5rem;
+  }
 }
 

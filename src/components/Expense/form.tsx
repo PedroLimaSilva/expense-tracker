@@ -7,9 +7,10 @@ interface ExpenseFormProps {
   expense?: Expense | null
   onSubmit: (data: ExpenseFormData) => Promise<void>
   onCancel: () => void
+  onDelete?: (expenseId: string) => void
 }
 
-export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
+export function ExpenseForm({ expense, onSubmit, onCancel, onDelete }: ExpenseFormProps) {
   const { expenseCategories, loading: categoriesLoading } = useCategories()
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
@@ -137,12 +138,32 @@ export function ExpenseForm({ expense, onSubmit, onCancel }: ExpenseFormProps) {
         </div>
 
         <div className="form-actions">
-          <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? 'Saving...' : (expense ? 'Update' : 'Add')}
-          </button>
-          <button type="button" onClick={onCancel} className="btn btn-secondary" disabled={loading}>
-            Cancel
-          </button>
+          <div className="form-actions-left">
+            {expense && onDelete && (
+              <button 
+                type="button" 
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this expense?')) {
+                    onDelete(expense.id)
+                  }
+                }}
+                className="btn btn-danger"
+                disabled={loading}
+                title="Delete expense"
+              >
+                <span className="material-icons">delete</span>
+                Delete
+              </button>
+            )}
+          </div>
+          <div className="form-actions-right">
+            <button type="submit" disabled={loading} className="btn btn-primary">
+              {loading ? 'Saving...' : (expense ? 'Update' : 'Add')}
+            </button>
+            <button type="button" onClick={onCancel} className="btn btn-secondary" disabled={loading}>
+              Cancel
+            </button>
+          </div>
         </div>
       </form>
     </div>
