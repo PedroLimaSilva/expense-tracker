@@ -12,8 +12,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'autoUpdate', // Auto-update but ensure offline functionality works
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      devOptions: {
+        enabled: true, // Enable in dev for testing
+        type: 'module'
+      },
       manifest: {
         name: 'Expense Tracker',
         short_name: 'Expense Tracker',
@@ -38,15 +42,37 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+        // Ensure all app shell assets are precached
+        maximumFileSizeToCacheInBytes: 5000000, // 5MB - increase if needed
+        // Clean up old caches on update
+        cleanupOutdatedCaches: true,
+        // Runtime caching for static external assets only
+        // Note: Firebase API requests are NOT cached - app uses IndexedDB for offline-first storage
         runtimeCaching: [
           {
+            // Cache Google Fonts - CacheFirst since fonts don't change often
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache Google Fonts stylesheets
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-static-cache',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
