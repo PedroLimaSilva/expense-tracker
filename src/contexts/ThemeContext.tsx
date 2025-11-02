@@ -45,6 +45,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     } else {
       root.removeAttribute('data-theme')
     }
+
+    // Update theme-color meta tag
+    const themeColorMeta = document.querySelector('meta[name="theme-color"]')
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', theme === 'dark' ? '#161b22' : '#f8f9fa')
+    }
   }, [theme])
 
   // Load theme preference when user logs in

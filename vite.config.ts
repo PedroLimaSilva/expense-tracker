@@ -18,7 +18,12 @@ export default defineConfig({
         name: 'Expense Tracker',
         short_name: 'Expense Tracker',
         description: 'Track your personal expenses offline and sync to cloud',
-        theme_color: '#ffffff',
+        theme_color: '#38ef7d',
+        background_color: '#161b22',
+        display: 'standalone',
+        start_url: '/',
+        scope: '/',
+        orientation: 'portrait',
         icons: [
           {
             src: 'pwa-192x192.png',
@@ -34,6 +39,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
