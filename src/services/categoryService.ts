@@ -28,14 +28,31 @@ class CategoryService {
   // Initialize default categories for a new user
   async initializeDefaultCategories(userId: string): Promise<void> {
     try {
-      // Check if user already has categories
+      // First, check if user already has categories in IndexedDB
       const existingCategories = await indexedDb.categories
         .where('userId')
         .equals(userId)
         .toArray()
 
       if (existingCategories.length > 0) {
-        return // Already initialized
+        return // Already initialized locally
+      }
+
+      // Also check Firebase to avoid duplicates on reinstall
+      // This is important: if user reinstalls, IndexedDB is empty but Firebase has categories
+      try {
+        const cloudCategories = await syncService.fetchCategoriesFromCloud(userId)
+        if (cloudCategories.length > 0) {
+          // Sync cloud categories to IndexedDB instead of creating new defaults
+          for (const category of cloudCategories) {
+            await indexedDb.categories.put({ ...category, synced: true })
+          }
+          return // Use existing categories from cloud
+        }
+      } catch (error) {
+        // If we can't fetch from cloud (offline or error), proceed with creating defaults
+        // This ensures the app works offline for new users
+        console.warn('Could not fetch categories from cloud, will create defaults:', error)
       }
 
       const now = Date.now()
