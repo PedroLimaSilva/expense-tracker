@@ -1,0 +1,28 @@
+name: Deploy to Mac Studio
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Deploy to Mac Studio via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.MAC_STUDIO_HOST }}
+          username: ${{ secrets.MAC_STUDIO_USER }}
+          key: ${{ secrets.MAC_STUDIO_SSH_KEY }}
+          script: |
+            cd /path/to/expense-tracker
+            docker-compose pull
+            docker-compose up -d
+            docker image prune -f

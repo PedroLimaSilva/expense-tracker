@@ -36,7 +36,7 @@ A Progressive Web App (PWA) for tracking personal expenses that works offline an
 
 3. **Create environment file:**
    ```bash
-   cp .env.example .env
+   cp env.example .env
    ```
 
 4. **Add your Firebase config to `.env`:**
@@ -117,6 +117,37 @@ A Progressive Web App (PWA) for tracking personal expenses that works offline an
    ```bash
    yarn build
    ```
+
+### Docker Deployment (24/7 Hosting)
+
+For running the app continuously on a Mac Studio or any server:
+
+1. **Set up environment variables:**
+   ```bash
+   cp env.example .env
+   # Edit .env with your Firebase credentials
+   ```
+
+2. **Build and run with Docker:**
+   ```bash
+   yarn docker:up
+   ```
+
+3. **Access the app:**
+   - Locally: `http://localhost:3000`
+   - On network: `http://YOUR_MAC_IP:3000`
+
+See [DOCKER_SETUP.md](DOCKER_SETUP.md) for detailed Docker instructions.
+
+### Automated CI/CD Deployment
+
+Automatically build and deploy Docker images on every push:
+
+1. **Push triggers build** - Docker image is built with latest code
+2. **Pushed to GitHub Container Registry** - Image is stored and tagged
+3. **Auto-deploy (optional)** - New image is automatically deployed to Mac Studio
+
+See [CI_CD_SETUP.md](CI_CD_SETUP.md) for complete CI/CD setup instructions.
 
 ## How It Works
 
