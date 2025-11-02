@@ -2,12 +2,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import './index.scss'
 
 interface NavBarProps {
-  onSync: () => void
-  syncing: boolean
   online: boolean
 }
 
-export function NavBar({ onSync, syncing, online }: NavBarProps) {
+export function NavBar({ online }: NavBarProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -32,16 +30,6 @@ export function NavBar({ onSync, syncing, online }: NavBarProps) {
             ) : (
               <span className="status-badge offline" title="Offline">Offline</span>
             )}
-            <button
-              onClick={onSync}
-              disabled={syncing || !online}
-              className="btn btn-small btn-secondary btn-icon"
-              title="Sync with cloud"
-            >
-              <span className={`material-icons ${syncing ? 'sync-animation' : ''}`}>
-                sync
-              </span>
-            </button>
           </div>
           <button
             onClick={() => navigate('/settings')}

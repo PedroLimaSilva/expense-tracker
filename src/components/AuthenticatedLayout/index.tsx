@@ -3,10 +3,11 @@ import { useData } from '../../contexts/DataContext'
 import { useTimeWindow } from '../../contexts/TimeWindowContext'
 import { NavBar } from '../NavBar'
 import { TimeWindowSelector } from '../TimeWindowSelector'
+import { PullToRefresh } from '../PullToRefresh'
 import './index.scss'
 
 export function AuthenticatedLayout() {
-  const { loading, syncing, online, syncData } = useData()
+  const { loading, online, syncData } = useData()
   const location = useLocation()
   const { timeWindow, setTimeWindow } = useTimeWindow()
 
@@ -16,7 +17,7 @@ export function AuthenticatedLayout() {
   if (loading) {
     return (
       <div className="authenticated-layout">
-        <NavBar onSync={syncData} syncing={syncing} online={online} />
+        <NavBar online={online} />
         <div className="loading">
           <div className="loading-message">Loading...</div>
         </div>
@@ -31,10 +32,12 @@ export function AuthenticatedLayout() {
 
   return (
     <div className="authenticated-layout">
-      <NavBar onSync={syncData} syncing={syncing} online={online} />
-      <main className="authenticated-main">
-        <Outlet />
-      </main>
+      <NavBar online={online} />
+      <PullToRefresh onRefresh={syncData} enabled={online} disabled={loading}>
+        <main className="authenticated-main">
+          <Outlet />
+        </main>
+      </PullToRefresh>
       {showTimeWindow && (
         <div className="time-window-container">
           <TimeWindowSelector value={timeWindow} onChange={setTimeWindow} />
