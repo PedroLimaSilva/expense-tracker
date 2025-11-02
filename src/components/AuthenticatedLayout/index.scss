@@ -1,0 +1,16 @@
+.authenticated-layout {
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+.authenticated-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.loading {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--text-tertiary);
+}

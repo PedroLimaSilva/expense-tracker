@@ -1,0 +1,56 @@
+.overview {
+  .dashboard-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    flex-wrap: wrap;
+  }
+
+  .balance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .balance-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+
+    h3 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      margin-bottom: var(--spacing-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    &.income-card {
+      border-left: 4px solid var(--success);
+    }
+
+    &.expense-card {
+      border-left: 4px solid var(--danger);
+    }
+
+    &.net-card {
+      &.positive {
+        border-left: 4px solid var(--success);
+      }
+
+      &.negative {
+        border-left: 4px solid var(--danger);
+      }
+    }
+  }
+
+  .balance-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+}

@@ -12,6 +12,7 @@
 }
 
 .currency-select {
+  width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -20,11 +21,10 @@
   color: var(--text-primary);
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  
+
   &:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
   }
 }
-
