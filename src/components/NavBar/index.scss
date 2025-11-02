@@ -31,17 +31,11 @@
   flex-wrap: wrap;
 }
 
-.status-indicators {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.status-badge {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
+.status-indicator {
+  width: 100%;
+  position: absolute;
+  top: -1px;
+  height: 4px;
 
   &.online {
     background-color: var(--status-online-bg);
@@ -52,6 +46,15 @@
     background-color: var(--status-offline-bg);
     color: var(--status-offline-text);
   }
+}
+
+.status-badge {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+
+
 }
 
 .navbar-tabs {
@@ -90,10 +93,10 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  
+
   .material-icons {
     font-size: 1.5rem;
-    
+
     &.sync-animation {
       animation: spin 1s linear infinite;
       transform-origin: center;
@@ -105,6 +108,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

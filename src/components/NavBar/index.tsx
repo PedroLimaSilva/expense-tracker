@@ -22,15 +22,9 @@ export function NavBar({ online }: NavBarProps) {
 
   return (
     <nav className="navbar">
+      <div className={"status-indicator " + (online ? 'online' : 'offline')} />
       <div className="navbar-content">
         <div className="navbar-actions">
-          <div className="status-indicators">
-            {online ? (
-              <span className="status-badge online" title="Online">Online</span>
-            ) : (
-              <span className="status-badge offline" title="Offline">Offline</span>
-            )}
-          </div>
           <button
             onClick={() => navigate('/settings')}
             className="btn btn-icon btn-settings"
