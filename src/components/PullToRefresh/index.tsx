@@ -22,7 +22,7 @@ export function PullToRefresh({ onRefresh, enabled = true, children, disabled = 
     const handleTouchStart = (e: TouchEvent) => {
       // Check if we're at the top of the page or scrollable container
       const scrollTop = window.scrollY || document.documentElement.scrollTop
-      
+
       // Only start pull if at the top
       if (scrollTop === 0) {
         touchStartY.current = e.touches[0].clientY
@@ -102,7 +102,6 @@ export function PullToRefresh({ onRefresh, enabled = true, children, disabled = 
           <div className={`refresh-icon ${isRefreshing ? 'spinning' : ''}`}>
             <span className="material-icons">sync</span>
           </div>
-          {isRefreshing && <div className="refresh-text">Syncing...</div>}
         </div>
       )}
       {children}
