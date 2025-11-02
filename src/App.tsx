@@ -13,7 +13,6 @@ import { Overview } from './pages/Overview'
 import { IncomePage } from './pages/Income'
 import { ExpensesPage } from './pages/Expenses'
 import { CategoriesPage } from './pages/Categories'
-import { Settings } from './pages/Settings'
 
 function App() {
   return (
@@ -40,16 +39,6 @@ function App() {
                     <Route path="income" element={<IncomePage />} />
                     <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
-                  </Route>
-                  <Route
-                    path="/settings"
-                    element={
-                      <PrivateRoute>
-                        <AuthenticatedLayout />
-                      </PrivateRoute>
-                    }
-                  >
-                    <Route index element={<Settings />} />
                   </Route>
                   <Route path="*" element={<Navigate to="/overview" />} />
                 </Routes>

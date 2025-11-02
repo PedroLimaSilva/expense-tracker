@@ -3,9 +3,10 @@ import './index.scss'
 
 interface NavBarProps {
   online: boolean
+  onOpenSettings: () => void
 }
 
-export function NavBar({ online }: NavBarProps) {
+export function NavBar({ online, onOpenSettings }: NavBarProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -26,7 +27,7 @@ export function NavBar({ online }: NavBarProps) {
       <div className="navbar-content">
         <div className="navbar-actions">
           <button
-            onClick={() => navigate('/settings')}
+            onClick={onOpenSettings}
             className="btn btn-icon btn-settings"
             title="Settings"
           >
