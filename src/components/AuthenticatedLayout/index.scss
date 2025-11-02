@@ -1,16 +1,38 @@
 .authenticated-layout {
   background-color: var(--bg-primary);
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .authenticated-main {
   max-width: 1200px;
-  margin: 0 auto;
   padding: var(--spacing-xl);
+  padding-bottom: 200px; // Space for fixed time window selector
+  flex: 1;
 }
 
 .loading {
   text-align: center;
   padding: var(--spacing-2xl);
   color: var(--text-tertiary);
+  flex: 1;
+}
+
+.time-window-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--surface);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-width: 100%;
+  padding: var(--spacing-md) var(--spacing-xl) var(--spacing-xl) var(--spacing-xl);
+}
+
+.time-window-container .time-window-selector {
+  max-width: 1200px;
+  margin: 0 auto;
 }

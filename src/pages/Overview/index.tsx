@@ -4,26 +4,34 @@ import { useData } from '../../contexts/DataContext'
 import { useCurrency } from '../../contexts/CurrencyContext'
 import { ExpenseForm } from '../../components/Expense/form'
 import { IncomeForm } from '../../components/Income/form'
-import { type Expense, type ExpenseFormData } from '../../types/expense'
-import { type Income, type IncomeFormData } from '../../types/income'
+import { type ExpenseFormData } from '../../types/expense'
+import { type IncomeFormData } from '../../types/income'
 import { expenseService } from '../../services/expenseService'
 import { incomeService } from '../../services/incomeService'
 import { useAuth } from '../../contexts/AuthContext'
+import { useTimeWindow } from '../../contexts/TimeWindowContext'
+import { filterByTimeWindow, formatTimeWindowHeading } from '../../utils/dateFilter'
 import './index.scss'
 
 export function Overview() {
   const { expenses, income, loadData } = useData()
   const { currentUser } = useAuth()
   const { formatCurrency } = useCurrency()
+  const { timeWindow } = useTimeWindow()
   const navigate = useNavigate()
   const [showForm, setShowForm] = useState(false)
   const [formType, setFormType] = useState<'income' | 'expense' | null>(null)
-  const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
-  const [editingIncome, setEditingIncome] = useState<Income | null>(null)
 
-  const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0)
-  const totalIncome = income.reduce((sum, inc) => sum + inc.amount, 0)
+  const filteredExpenses = filterByTimeWindow(expenses, timeWindow)
+  const filteredIncome = filterByTimeWindow(income, timeWindow)
+
+  const totalExpenses = filteredExpenses.reduce((sum, exp) => sum + exp.amount, 0)
+  const totalIncome = filteredIncome.reduce((sum, inc) => sum + inc.amount, 0)
   const netIncome = totalIncome - totalExpenses
+
+  // Get localized heading
+  const displayLocale = navigator.language || 'en-US'
+  const timeWindowHeading = formatTimeWindowHeading(timeWindow, displayLocale)
 
   async function handleAddExpense(data: ExpenseFormData) {
     if (!currentUser) return
@@ -32,7 +40,6 @@ export function Overview() {
       await expenseService.createExpense(currentUser.uid, data)
       await loadData()
       setShowForm(false)
-      setEditingExpense(null)
       navigate('/expenses')
     } catch (error) {
       console.error('Error adding expense:', error)
@@ -47,7 +54,6 @@ export function Overview() {
       await incomeService.createIncome(currentUser.uid, data)
       await loadData()
       setShowForm(false)
-      setEditingIncome(null)
       navigate('/income')
     } catch (error) {
       console.error('Error adding income:', error)
@@ -57,8 +63,6 @@ export function Overview() {
 
   function handleCancelForm() {
     setShowForm(false)
-    setEditingExpense(null)
-    setEditingIncome(null)
     setFormType(null)
   }
 
@@ -86,11 +90,11 @@ export function Overview() {
 
   return (
     <div className="overview">
+      <h2 className="time-window-heading-top">{timeWindowHeading}</h2>
+
       <div className="dashboard-actions">
         <button
           onClick={() => {
-            setEditingIncome(null)
-            setEditingExpense(null)
             setFormType('income')
             setShowForm(true)
           }}
@@ -101,8 +105,6 @@ export function Overview() {
         </button>
         <button
           onClick={() => {
-            setEditingIncome(null)
-            setEditingExpense(null)
             setFormType('expense')
             setShowForm(true)
           }}

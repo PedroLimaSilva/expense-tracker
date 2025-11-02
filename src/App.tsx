@@ -4,6 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
 import { CategoryProvider } from './contexts/CategoryContext'
 import { DataProvider } from './contexts/DataContext'
+import { TimeWindowProvider } from './contexts/TimeWindowContext'
 import { PrivateRoute } from './pages/PrivateRoute'
 import { AuthenticatedLayout } from './components/AuthenticatedLayout'
 import { Login } from './pages/Login'
@@ -20,8 +21,9 @@ function App() {
       <ThemeProvider>
         <CurrencyProvider>
           <CategoryProvider>
-            <DataProvider>
-              <BrowserRouter>
+            <TimeWindowProvider>
+              <DataProvider>
+                <BrowserRouter>
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
@@ -52,7 +54,8 @@ function App() {
                   <Route path="*" element={<Navigate to="/overview" />} />
                 </Routes>
               </BrowserRouter>
-            </DataProvider>
+              </DataProvider>
+            </TimeWindowProvider>
           </CategoryProvider>
         </CurrencyProvider>
       </ThemeProvider>

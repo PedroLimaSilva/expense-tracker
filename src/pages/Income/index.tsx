@@ -1,18 +1,26 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useData } from '../../contexts/DataContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { IncomeList } from '../../components/Income/list'
 import { IncomeForm } from '../../components/Income/form'
 import { type Income, type IncomeFormData } from '../../types/income'
 import { incomeService } from '../../services/incomeService'
+import { useTimeWindow } from '../../contexts/TimeWindowContext'
+import { filterByTimeWindow, formatTimeWindowHeading } from '../../utils/dateFilter'
+import './index.scss'
 
 export function IncomePage() {
   const { income, loadData } = useData()
   const { currentUser } = useAuth()
-  const navigate = useNavigate()
+  const { timeWindow } = useTimeWindow()
   const [showForm, setShowForm] = useState(false)
   const [editingIncome, setEditingIncome] = useState<Income | null>(null)
+
+  const filteredIncome = filterByTimeWindow(income, timeWindow)
+
+  // Get localized heading
+  const displayLocale = navigator.language || 'en-US'
+  const timeWindowHeading = formatTimeWindowHeading(timeWindow, displayLocale)
 
   async function handleAddIncome(data: IncomeFormData) {
     if (!currentUser) return
@@ -76,6 +84,8 @@ export function IncomePage() {
 
   return (
     <div className="income-page">
+      <h2 className="time-window-heading-top">{timeWindowHeading}</h2>
+      
       <div className="dashboard-actions">
         <button
           onClick={() => {
@@ -89,7 +99,7 @@ export function IncomePage() {
         </button>
       </div>
       <IncomeList
-        income={income}
+        income={filteredIncome}
         onEdit={handleEditIncome}
         onDelete={handleDeleteIncome}
       />

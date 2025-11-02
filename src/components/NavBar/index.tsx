@@ -25,10 +25,6 @@ export function NavBar({ onSync, syncing, online }: NavBarProps) {
   return (
     <nav className="navbar">
       <div className="navbar-content">
-        <div className="navbar-title">
-          <h1>Expense Tracker</h1>
-        </div>
-        
         <div className="navbar-actions">
           <div className="status-indicators">
             {online ? (
@@ -85,6 +81,7 @@ export function NavBar({ onSync, syncing, online }: NavBarProps) {
           </button>
         </div>
       )}
+
     </nav>
   )
 }

@@ -1,18 +1,26 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useData } from '../../contexts/DataContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { ExpenseList } from '../../components/Expense/list'
 import { ExpenseForm } from '../../components/Expense/form'
 import { type Expense, type ExpenseFormData } from '../../types/expense'
 import { expenseService } from '../../services/expenseService'
+import { useTimeWindow } from '../../contexts/TimeWindowContext'
+import { filterByTimeWindow, formatTimeWindowHeading } from '../../utils/dateFilter'
+import './index.scss'
 
 export function ExpensesPage() {
   const { expenses, loadData } = useData()
   const { currentUser } = useAuth()
-  const navigate = useNavigate()
+  const { timeWindow } = useTimeWindow()
   const [showForm, setShowForm] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+
+  const filteredExpenses = filterByTimeWindow(expenses, timeWindow)
+
+  // Get localized heading
+  const displayLocale = navigator.language || 'en-US'
+  const timeWindowHeading = formatTimeWindowHeading(timeWindow, displayLocale)
 
   async function handleAddExpense(data: ExpenseFormData) {
     if (!currentUser) return
@@ -79,6 +87,8 @@ export function ExpensesPage() {
 
   return (
     <div className="expenses-page">
+      <h2 className="time-window-heading-top">{timeWindowHeading}</h2>
+      
       <div className="dashboard-actions">
         <button
           onClick={() => {
@@ -92,7 +102,7 @@ export function ExpensesPage() {
         </button>
       </div>
       <ExpenseList
-        expenses={expenses}
+        expenses={filteredExpenses}
         onEdit={handleEditExpense}
         onDelete={handleDeleteExpense}
       />
